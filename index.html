@@ -736,15 +736,17 @@ const STAYS=[
 ];
 
 const PRETRIP_SPEND=[
- {group:'FLIGHTS',title:'Cathay Pacific · CX844 + CX885 · 3 people',amount:'HK$23,823.00',paidBy:'Ernest',status:'unsettled'},
+ {group:'FLIGHTS',title:'Cathay Pacific · CX844 + CX885 · 3 people',amount:'HK$23,823.00',paidBy:'Ernest',status:'settled'},
  {group:'FLIGHTS',title:'JetBlue · B6 1573 · EWR → LAX · 3 people',amount:'HK$5,460.00',paidBy:'HK$1,820 each → Sophia',status:'settled'},
- {group:'STAYS',title:'Jersey City Airbnb · 5 nights',amount:'HK$15,602.15',paidBy:'Krince',status:'unsettled'},
- {group:'STAYS',title:'Burbank Airbnb · 2 nights',amount:'HK$4,362.03',paidBy:'Krince',status:'unsettled'},
- {group:'STAYS',title:'Pixar Place Hotel · 2 nights',amount:'HK$11,493.00',paidBy:'Krince',status:'unsettled'},
- {group:'STAYS',title:'Final LA Airbnb · 2 nights',amount:'HK$4,973.43',paidBy:'Krince',status:'unsettled'},
- {group:'TICKETS',title:'Universal Studios Hollywood + HHN · 3 people',amount:'HK$3,342.18',paidBy:'Krince',status:'unsettled'},
- {group:'TICKETS',title:'Disneyland · 3-Day 1-Park + Lightning Lane Multi Pass · 3 people',amount:'HK$10,853.41',paidBy:'Krince',status:'unsettled'},
- {group:'TICKETS',title:'Harry Potter and the Cursed Child · 3 people',amount:'US$510.00',paidBy:'Krince',status:'unsettled'}
+ {group:'TRANSPORT',title:'Rental Car · 3 people',amount:'HK$1,925.00',paidBy:'Silke',status:'krince-settled'},
+ {group:'STAYS',title:'Jersey City Airbnb · 5 nights',amount:'HK$15,602.15',paidBy:'Krince',status:'settled'},
+ {group:'STAYS',title:'Burbank Airbnb · 2 nights',amount:'HK$4,362.03',paidBy:'Krince',status:'settled'},
+ {group:'STAYS',title:'Pixar Place Hotel · 2 nights',amount:'HK$11,493.00',paidBy:'Krince',status:'settled'},
+ {group:'STAYS',title:'Final LA Airbnb · 2 nights',amount:'HK$4,973.43',paidBy:'Krince',status:'settled'},
+ {group:'TICKETS',title:'Universal Studios Hollywood + HHN · 3 people',amount:'HK$3,342.18',paidBy:'Krince',status:'settled'},
+ {group:'TICKETS',title:'Disneyland · 3-Day 1-Park + Lightning Lane Multi Pass · 3 people',amount:'HK$10,853.41',paidBy:'Krince',status:'settled'},
+ {group:'TICKETS',title:'Harry Potter and the Cursed Child · 3 people',amount:'US$510.00',paidBy:'Krince',status:'unsettled'},
+ {group:'EXTRAS',title:'Harry Potter · Sirius outfits · HK$300 each × 3',amount:'HK$900.00',paidBy:'Silke',status:'krince-settled'}
 ];
 
 function copyText(t){
@@ -783,6 +785,9 @@ function flightCard(f){
 
 function spendCard(s){
  const settled=s.status==='settled';
+ const krinceSettled=s.status==='krince-settled';
+ const statusClass=(settled||krinceSettled)?'settled':'unsettled';
+ const statusText=settled?'GROUP SETTLED ✓':krinceSettled?'KRINCE SHARE SETTLED ✓':'GROUP UNSETTLED';
  return `<div class="spend-card">
    <div class="spend-row">
      <div class="spend-title">${esc(s.title)}</div>
@@ -790,7 +795,7 @@ function spendCard(s){
    </div>
    <div class="spend-meta">
      <span class="pill paid">PAID BY · ${esc(s.paidBy)}</span>
-     <span class="pill ${settled?'settled':'unsettled'}">${settled?'GROUP SETTLED ✓':'GROUP UNSETTLED'}</span>
+     <span class="pill ${statusClass}">${statusText}</span>
    </div>
  </div>`;
 }
@@ -820,19 +825,19 @@ function renderStays(){
 }
 
 function renderPreTrip(){
- const groups=['FLIGHTS','STAYS','TICKETS'];
+ const groups=['FLIGHTS','TRANSPORT','STAYS','TICKETS','EXTRAS'];
  $('pretripinfo').innerHTML=header('red','PRE-TRIP','出發前<br>開支')+
  `<div class="pad">
    <div class="pretrip-total">
      <div class="pretrip-kicker">PRE-TRIP SPEND SO FAR</div>
-     <div class="pretrip-hkd">HK$79,909.20</div>
+     <div class="pretrip-hkd">HK$82,734.20</div>
      <div class="pretrip-usd">US$510.00</div>
-     <div class="pretrip-foot">3 travellers · shared trip costs only · before departure<br>呢個係「成團已經洗咗幾多」；包括已經各自還清 Sophia 嘅 JetBlue。</div>
+     <div class="pretrip-foot">3 travellers · trip costs recorded before departure<br>已加入 Rental Car HK$1,925；Sirius outfits HK$300 each × 3。</div>
    </div>
 
    ${groups.map(g=>`<div class="spend-group">${g}</div>${PRETRIP_SPEND.filter(s=>s.group===g).map(spendCard).join('')}`).join('')}
 
-   <div class="practical-note"><strong>🚗 未計入</strong><br>Rental Car 未firm／未付款。MJ／LE SSERAFIM 等唔係三人共同活動亦不計。</div>
+   <div class="practical-note"><strong>✅ 最新 settlement 狀態</strong><br>Krince 相關 HKD balance 已全部清晒；Ernest 嘅 US$170 亦已清。<br><strong>唯一仍未收：Silke → Krince US$170。</strong><br><br>🚗 Rental Car 由 Silke 付款；👕 Sirius outfit HK$300／人亦由 Silke 代買。Krince 自己應付 Silke 嘅部分已經還清。</div>
 
    <div class="practical-section">PRE-TRIP SETTLEMENT</div>
    <div class="settlement-card">
@@ -841,38 +846,32 @@ function renderPreTrip(){
 
      <div class="currency-block">
        <div class="currency-big">HKD</div>
-       <div class="currency-sub">未settle嘅三人共同港幣開支 · JetBlue 已同 Sophia settle，所以唔再計入</div>
-       <div class="settlement-line"><span>SILKE → KRINCE</span><span class="settlement-amount">HK$24,816.40</span></div>
-       <div class="settlement-line"><span>ERNEST → KRINCE</span><span class="settlement-amount">HK$993.40</span></div>
+       <div class="currency-sub">所有原有港幣 balance 已 settled</div>
+       <div class="settlement-line"><span>HKD BALANCE</span><span class="settlement-amount">SETTLED ✓</span></div>
      </div>
 
      <div class="currency-block">
        <div class="currency-big">USD</div>
        <div class="currency-sub">Harry Potter tickets · US$510 ÷ 3 = US$170 / person</div>
        <div class="settlement-line"><span>SILKE → KRINCE</span><span class="settlement-amount">US$170.00</span></div>
-       <div class="settlement-line"><span>ERNEST → KRINCE</span><span class="settlement-amount">US$170.00</span></div>
+       <div class="settlement-line"><span>ERNEST → KRINCE</span><span class="settlement-amount">SETTLED ✓</span></div>
      </div>
 
-     <div class="settlement-note">HKD / USD 分開結算，唔用匯率夾埋一條數。</div>
+     <div class="settlement-note">目前唯一 outstanding：Silke → Krince US$170。HKD / USD 繼續分開記錄。</div>
    </div>
 
    <div class="balance-explain">
-     <div class="balance-explain-title">點解 Ernest 港幣只差 HK$993.40？</div>
+     <div class="balance-explain-title">最新付款狀態</div>
      <div class="balance-grid">
-       <span>未settle HKD共同開支</span><b>HK$74,449.20</b>
-       <span>三人平均每人應付</span><b>HK$24,816.40</b>
-       <span>Ernest 已經墊付 Cathay 全部3張</span><b>HK$23,823.00</b>
-     </div>
-     <div class="balance-rule"></div>
-     <div class="balance-grid">
-       <span>Ernest 尚欠</span><b>HK$993.40</b>
-       <span>Krince 已墊付其他 HKD共同開支</span><b>HK$50,626.20</b>
-       <span>Silke 目前未墊呢批 HKD共同開支</span><b>HK$0.00</b>
+       <span>Silke → Krince · HKD</span><b>SETTLED ✓</b>
+       <span>Ernest → Krince · HKD</span><b>SETTLED ✓</b>
+       <span>Ernest → Krince · Harry Potter</span><b>US$170 · SETTLED ✓</b>
+       <span>Silke → Krince · Harry Potter</span><b>US$170 · OUTSTANDING</b>
+       <span>Krince → Silke · Rental Car / Sirius outfit</span><b>SETTLED ✓</b>
      </div>
    </div>
  </div>`;
 }
-
 function showPacking(){show('packing');renderPacking()}
 function renderPacking(doRefresh=true){const state=get('packing',{}),all=Object.entries(PACKING).flatMap(([g,a])=>a.map(i=>g+'|'+i)),done=all.filter(k=>state[k]).length,pct=Math.round(done/all.length*100)||0;$('packing').innerHTML=header('blue','BEFORE TRIP','PACKING<br>CHECKLIST')+`<div id="packSyncStatus" class="syncbar busy"><span><span class="dot">●</span> CLOUD SYNC</span><button onclick="manualSync()">SYNC NOW</button></div><div class="pad"><div class="panel"><div style="display:flex;justify-content:space-between;align-items:end"><b style="font:700 21px Oswald;color:var(--red)">PACKING PROGRESS</b><b style="font:700 30px Oswald">${pct}%</b></div><div class="progress"><span style="width:${pct}%"></span></div><div style="margin-top:9px"><button class="del" onclick="resetPacking()">RESET CHECKLIST</button></div></div>${Object.entries(PACKING).map(([g,a])=>`<div class="pack-group"><h3>${g}</h3>${a.map(i=>{const key=g+'|'+i;return `<label class="pack-row"><input type="checkbox" ${state[key]?'checked':''} onchange="togglePack('${encodeURIComponent(key)}',this.checked)"><span>${esc(i)}</span></label>`}).join('')}</div>`).join('')}</div>`}
 function togglePack(k,v){const key=decodeURIComponent(k),s=get('packing',{});s[key]=v;put('packing',s);enqueue('updatePacking',{key,checked:Boolean(v)});renderPacking(false);flushSyncQueue(true)}
